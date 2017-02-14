@@ -1,0 +1,323 @@
+<html>
+<head>
+    <script src="{{ STATIC_URL }}js/jquery-3.1.1.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
+</head>
+
+<body>
+<div id="dialog-form" title="Create new task">
+  <p class="validateTips">Name, description fields are required.</p>
+ 
+  <form id="taskForm" method="POST" action="/task-edit">
+    {% csrf_token %}
+    <fieldset>
+    {{ task_form.as_p }}
+    </fieldset>
+  </form>
+</div>
+
+<div id="users-contain" class="ui-widget">
+    <h1>Welcome to Simple task manager, {{ username }}</h1>
+
+    <span style="float: right;">
+        <span id="loadingDiv">Loading...</span> &nbsp;&nbsp;
+        <span id="operation_status"></span> &nbsp;&nbsp;
+
+        <a href="#" id="hide_done">Hide done</a>&nbsp;&nbsp;
+        <a href="#" id="only_mine">Show my tasks</a>&nbsp;&nbsp;&nbsp;
+
+        <button id="create-user">Add</button>
+    </span>
+
+    <div id="task_list"></div>
+
+</div>
+
+
+<script>
+$(document).ready(function() {
+    // set ajax loading show/hide indicator
+    var $loading = $('#loadingDiv').hide();
+    $(document)
+    .ajaxStart(function () {
+        $loading.show();
+    })
+    .ajaxStop(function () {
+        $loading.hide();
+    });
+
+    // variables
+    var dialog, form,
+        emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+        name = $( "#id_name" ),
+        description = $( "#id_description" ),
+        allFields = $( [] ).add( name ).add( description ),
+        tips = $( ".validateTips" );
+
+    // client-side form validation
+    function updateTips( t ) {
+        tips
+            .text( t )
+            .addClass( "ui-state-highlight" );
+        setTimeout(function() {
+            tips.removeClass( "ui-state-highlight", 1500 );
+        }, 500 );
+    }
+ 
+
+    function checkField( fld, n ) {
+        if ( fld.val().length == 0 ) {
+            fld.addClass( "ui-state-error" );
+            updateTips( "Set the required field: " + n);
+            return false;
+        } else {
+            return true;
+        }
+    }
+    function hideShow(el_list, task_id, show_id) {
+        for (var i=0; i<el_list.length; i++) {
+            el = el_list[i];
+            hide_id = ( show_id == "2" ? "1" : "2" );
+            $("#tid_" + el + "_" + task_id + "_" + hide_id).hide();
+            $("#tid_" + el + "_" + task_id + "_" + show_id).show();
+        }
+    }
+    // dialog on Edit task
+    function createEditDialog(task_id) {
+        // set bg color to editing task + TODO: set color back on save/cancel
+        $("td.tid_name_" + task_id).parent()[0].style["background-color"] = "#DADADA"
+        // save task's current status
+        cur_status = $("#stat_" + task_id).attr("value");
+        $('#operation_status').html("");
+        
+        elements = ["name", "act", "desc", "st"];
+        hideShow(elements, task_id, "2");
+
+        // select current status by value
+        $("td.tid_status_" + task_id + " select").val(cur_status).change();
+        return true;
+    }
+
+    function editCancel(task_id) {
+        elements = ["name", "act", "desc", "st"];
+        $("td.tid_name_" + task_id).parent()[0].style["background-color"] = "#FFFFFF";
+        hideShow(elements, task_id, "1");
+    } 
+
+    function editSave(task_id) {
+        var valid = true;
+        var allFields_row = $( [] ).add( $( "#id_name_" + task_id ) ).add( $( "#id_description_" + task_id ) );
+        allFields_row.removeClass( "ui-state-error" );
+ 
+        valid = valid && checkField( $( "#id_name_" + task_id ), "Name" );
+        valid = valid && checkField( $( "#id_description_" + task_id ), "Description" );
+
+        // construct POST data for update form
+        var post_data = "csrfmiddlewaretoken=" + $("input[name='csrfmiddlewaretoken']")[0].value + "&";
+        post_params = ["id", "name", "description", "status", "owner", "assigned"];
+        for (var i=0; i<post_params.length; i++) {
+            param = post_params[i];
+            post_data += param + "=" + $("#id_" + param + "_" + task_id).val() + "&"
+        }
+        console.log(post_data);
+
+        if (valid) {
+            $.ajax({
+                type: 'POST',
+                url: '/task-edit/',
+                dataType: 'json',
+                data: post_data, //$('#taskForm_' + task_id).serialize(),
+                success: function(data){
+                    console.log(data)
+                    if ("ok" in data) {
+                        $('#operation_status').html(data["ok"]); // update the HTML here
+                        dialog.dialog("close");
+                        getTasks();
+
+                    } else {
+                        $('#operation_status').html(JSON.stringify(data["error"]));
+                    }
+                
+                }
+            });
+        }
+    }
+
+    // form sending
+    function createTask(){
+        var valid = true;
+        allFields.removeClass( "ui-state-error" );
+ 
+        valid = valid && checkField( name, "Name" );
+        valid = valid && checkField( description, "Description" );
+
+        if (valid) {
+            $.ajax({
+                type: 'POST',
+                url: '/task-edit/',
+                dataType: 'json',
+                data: $('#taskForm').serialize(),
+                success: function(data){
+                    console.log(data)
+                    if ("ok" in data) {
+                        $('#operation_status').html(data["ok"]); // update the HTML here
+                        dialog.dialog("close");
+                        getTasks();
+
+                    } else {
+                        updateTips(JSON.stringify(data["error"]));
+                    }
+                
+                }
+            });
+        }
+    }
+
+    dialog = $( "#dialog-form" ).dialog({
+        autoOpen: false,
+        height: 700,
+        width: 600,
+        modal: true,
+        buttons: {
+            "Save task": createTask,
+            Cancel: function() {
+                dialog.dialog( "close" );
+                dialog = false;
+            }
+        },
+        close: function() {
+            form[ 0 ].reset();
+            allFields.removeClass( "ui-state-error" );
+        }
+    });
+
+    form = dialog.find( "form" ).on( "submit", function( event ) {
+        event.preventDefault();
+        createTask();
+    });
+
+ 
+    $( "#create-user" ).button().on( "click", function() {
+        $('#operation_status').html("");
+        dialog.dialog( "open" );
+    });
+
+    // get task list with filters
+    var hide_done = 0;
+    var only_mine = 0;
+    function getTasks() {
+        $.ajax({
+            type: 'GET',
+            url: '/task-list/?hide_done=' + hide_done + '&only_mine=' + only_mine,
+            dataType: 'html',
+            data: { },
+            success: function(data){
+                $('#task_list').html(data); // update the HTML here
+            }
+        })
+    }
+
+    // change task status 
+    function changeStatus(task_id, set_status) {
+        $.ajax({
+            type: 'GET',
+            url: '/task-status/?task_id=' + task_id + '&set_status=' + set_status,
+            dataType: 'json',
+            data: { },
+            success: function(data){
+                if ("ok" in data) {
+                    $('#operation_status').html(data["ok"]); // update the HTML here
+                } else {
+                    $('#operation_status').html("Error: " + data["error"]);
+                }
+                getTasks();
+            }
+        })
+    }
+
+    $("body").on("click", "button.mark_done",
+        function() {
+            task_id = $(this).attr("id");
+            changeStatus(task_id, "Done");
+        });
+
+    $("body").on("click", "button.start_progress",
+        function() {
+            task_id = $(this).attr("id");
+            changeStatus(task_id, "Doing");
+        });
+
+    $("body").on("click", "button.task_delete",
+        function() {
+            task_id = $(this).attr("id");
+            changeStatus(task_id, "Deleted");
+        });
+
+    $("body").on("click", "button.task_edit",
+        function() {
+            task_id = $(this).attr("id");
+            createEditDialog(task_id);
+        });
+
+    // handlers on Edit form
+    $("body").on("click", "button.t_cancel",
+        function() {
+            task_id = $(this).attr("id");
+            editCancel(task_id);
+        });
+    $("body").on("click", "button.t_save",
+        function() {
+            task_id = $(this).attr("id");
+            editSave(task_id);
+        });
+
+    // filter ajax events
+    $("#only_mine").on("click",
+        function() {
+            $('#operation_status').html("");
+            only_mine = 1 - only_mine;
+
+            $.ajax({
+                type: 'GET',
+                url: '/task-list/?hide_done=' + hide_done + '&only_mine=' + only_mine,
+                dataType: 'html',
+                data: { },
+                success: function(data){
+                    $('#task_list').html(data); // update the HTML here
+                    if (only_mine == 1) {
+                        $("#only_mine").text("Show all tasks")
+                    } else {
+                        $("#only_mine").text("Show my tasks")
+                    }
+                }
+            })
+    });
+
+    $("#hide_done").on("click",
+        function() {
+            $('#operation_status').html("");
+            hide_done = 1 - hide_done;
+
+            $.ajax({
+                type: 'GET',
+                url: '/task-list/?hide_done=' + hide_done + '&only_mine=' + only_mine,
+                dataType: 'html',
+                data: { },
+                success: function(data){
+                    $('#task_list').html(data); // update the HTML here
+                    if (hide_done == 1) {
+                        $("#hide_done").text("Show all")
+                    } else {
+                        $("#hide_done").text("Hide done")
+                    }
+                }
+            })
+    });
+    getTasks();
+});
+</script>
+
+</body>
+</html>

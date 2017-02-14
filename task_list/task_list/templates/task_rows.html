@@ -1,0 +1,68 @@
+<table id="users" class="ui-widget ui-widget-content">
+<tr><th>ID</th><th style="width: 200px;">Name</th><th style="width: 300px;">Desciption (point to see full)</th><th>Owner</th><th>Assigned</th><th>Status ↑</th><th style="width: 200px;">Actions</th></tr>
+{% for t in tasks %}
+<tr>
+<form id="taskForm_{{t.id}}" method="POST" action="/task-edit">
+<input type="hidden" id="desc_{{ t.id }}" name="desc_{{ t.id }}" value="{{ t.description }}" disabled="true">
+<input type="hidden" id="stat_{{ t.id }}" name="stat_{{ t.id }}" value="{{ t.status }}" disabled="true">
+<input type="hidden" id="id_id_{{ t.id }}" name="id" value="{{ t.id }}">
+<input type="hidden" id="id_owner_{{ t.id }}" name="id_owner" value="{{ t.owner_id }}">
+<input type="hidden" id="id_assigned_{{ t.id }}" name="id_assigned" value="{{ t.assigned_id }}">
+
+
+{% csrf_token %}
+<td class="td_task_id">{{ t.id }}</td>
+    <td class="tid_name_{{ t.id }}">
+        <span id="tid_name_{{ t.id }}_1">{{ t.name }}</span>
+        <span style="display: none;" id="tid_name_{{ t.id }}_2">
+            <label for="id_name_{{ t.id }}">Name:</label> <input id="id_name_{{ t.id }}" maxlength="50" size="20" name="name" type="text" value="{{ t.name }}"/>
+        </span>
+    </td>
+    <td class="tid_desc_{{ t.id }}" title="{{ t.description }}">
+        <span id="tid_desc_{{ t.id }}_1">{{ t.description|slice:":70"}}...</span>
+        <span id="tid_desc_{{ t.id }}_2" style="display: none;">
+            <label for="id_description_{{ t.id }}">Description:</label> <textarea cols="25" id="id_description_{{ t.id }}" name="description" rows="7">{{ t.description }}</textarea>
+        </span>
+    </td>
+    <td>{{ t.owner }}</td><td>{{ t.assigned }}</td>
+    <td class="tid_status_{{ t.id }}">
+    <span id="tid_st_{{ t.id }}_1">
+        {{ t.flavor_status }}<br/>
+        {% if t.flavor_status == "New" or t.flavor_status == "Done" %}
+            <button class="start_progress ui-button ui-corner-all ui-widget" id="{{t.id}}">Start</button>
+        {% endif %}
+        {% if t.flavor_status == "Doing" %}
+            <button class="mark_done ui-button ui-corner-all ui-widget" id="{{t.id}}">Done</button> 
+        {% endif %}
+    </span>
+    <span id="tid_st_{{ t.id }}_2" style="display: none;">
+        <label for="id_status_{{t.id}}">Status:</label> <select id="id_status_{{t.id}}" name="status"><option value="0">New</option><option value="1">Doing</option><option value="2">Done</option><option value="255">Deleted</option></select>
+    </span>
+</td>
+<td class="tid_act_{{ t.id }}">
+    {% if t.owner_id == user.id %}
+    <span id="tid_act_{{ t.id }}_1">
+        <button class="task_edit ui-button ui-corner-all ui-widget" id="{{t.id}}">Edit</button>
+        <button class="task_delete ui-button ui-corner-all ui-widget" id="{{t.id}}">Delete</button>
+    </span>
+    <span id="tid_act_{{ t.id }}_2" style="display: none;">
+        <button class="t_save ui-button ui-corner-all ui-widget" id="{{t.id}}">Save</button>
+        <button class="t_cancel ui-button ui-corner-all ui-widget" id="{{t.id}}">Cancel</button>
+    </span>
+    {% endif %}
+
+<!--
+<div id="dialog-form_{{ t.id }}" title="Edit task {{ t.id }}" style="display: none;">
+    <p class="validateTips_{{ t.id }}">Name, description fields are required.</p>
+ 
+        <fieldset>
+        {{ t.t_form.as_p }}
+        </fieldset>
+</div>
+//-->
+
+</td>
+</form>
+</tr>
+{% endfor %}
+</table>
