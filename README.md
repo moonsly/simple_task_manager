@@ -20,17 +20,22 @@ INSTALL
 
 3) Clone project to virtualenv:
 
-`cd env
-git clone https://github.com/moonsly/simple_task_manager.git ./code`
+```
+cd env
+git clone https://github.com/moonsly/simple_task_manager.git ./code
+```
 
 4) Install dependencies:
 
-`cd code
-pip install -r ./requirements.txt`
+```
+cd code
+pip install -r ./requirements.txt
+```
 
 5) In Mysql create user, database and configure them in settings.py:
 
-`DATABASES = {
+```
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'task_list',
@@ -39,7 +44,8 @@ pip install -r ./requirements.txt`
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
-}`
+}
+```
 
 6) Run migrate to make initial DB structure:
 
