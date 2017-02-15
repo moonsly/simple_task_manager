@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rq info --interval 1
+

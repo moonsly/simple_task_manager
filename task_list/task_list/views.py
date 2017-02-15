@@ -10,9 +10,13 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.db.models import Q
 from django.forms.models import model_to_dict
+from django.contrib.auth.models import User
+from rq import Queue
+from redis import Redis
 
 from task_list.models import Task
 from task_list.forms import TaskForm
+from task_list.utils import send_email_status_updated
 
 
 @staff_member_required
@@ -66,7 +70,7 @@ def task_status(request):
     try:
         task = Task.objects.get(pk=task_id)
     except Task.DoesNotExist:
-        return HttpResponse(json.dumps({'error': _('no such task')}),
+        return HttpResponse(json.dumps({'error': 'no such task'}),
                             content_type='application/json')
 
     # -- check if status is correct
@@ -77,13 +81,13 @@ def task_status(request):
 
     # -- check if user is owner for deleting
     if status_id == Task.STATUS_DELETED and task.owner != request.user:
-        return HttpResponse(json.dumps({'error': _('no rights to delete task ') +
+        return HttpResponse(json.dumps({'error': 'no rights to delete task ' +
                                                  '{}'.format(task_id)}),
                             content_type='application/json')
 
     # -- check if new status differs from current
     if set_status == task.flavor_status():
-        return HttpResponse(json.dumps({'error': _('can\'t change to the same status')}),
+        return HttpResponse(json.dumps({'error': 'can\'t change to the same status'}),
                             content_type='application/json')
 
     # -- update status
@@ -92,6 +96,8 @@ def task_status(request):
     task.status = status_id
 
     task.save()
+    # -- send email about status update
+    send_email_status_updated(request, task.assigned, set_status, edited=False)
 
     return HttpResponse(
         json.dumps({'ok': 'task {} status updated OK to {}'.format(task_id,
@@ -113,7 +119,13 @@ def task_edit(request):
         task_form = TaskForm(request.POST, **kwargs)
         if task_form.is_valid():
             task_form.save()
-            return HttpResponse(json.dumps({'ok': _('task saved successfully')}),
+            assigned = User.objects.get(pk=task_form.cleaned_data['assigned'].id)
+
+            # -- send email about task update
+            set_status = task_form.cleaned_data['status']
+            send_email_status_updated(request, assigned, set_status, edited=True)
+
+            return HttpResponse(json.dumps({'ok': 'task saved successfully'}),
                                 content_type='application/json')
 
         else:
