@@ -66,3 +66,9 @@ DATABASES = {
 `python ./manage.py runserver 0.0.0.0:8080`
 
 9) Enter django admin at /8080, create new users and then tasks on / , mark them Doing/Done, delete, edit, enjoy :)
+
+
+## Demo screenshots
+
+![title](https://github.com/moonsly/simple_task_manager)
+
