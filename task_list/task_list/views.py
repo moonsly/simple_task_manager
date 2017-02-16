@@ -23,7 +23,7 @@ from task_list.utils import send_email_status_updated
 def tasks_main(request):
     """Main SPA view with task list"""
     task_form = TaskForm(initial={"owner": request.user, "assigned": request.user})
-    context = {"username": request.user.username, "task_form": task_form}
+    context = {"username": request.user.username, "user": request.user, "task_form": task_form}
     return render_to_response("tasks.html", context=context,
                               context_instance=RequestContext(request))
 

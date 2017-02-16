@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """ utils with enqueing emails """
+import re
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "task_list.settings")
 
@@ -10,6 +11,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.conf import settings
 
 from task_list.mail_worker import send_email
+from task_list.models import Task
 
 
 def send_email_status_updated(request, user, new_status, edited=False):
@@ -24,6 +26,8 @@ Your colleague assigned the task to you and udpated status of the task to {statu
 --\n\n
 This is automatic letter from Simple task manager\n"""
 
+    if re.search(r'^\d+$', str(new_status)):
+        new_status = dict(Task.STATUSES)[int(new_status)]
     tmpl_args = {"username": user.username, "status": new_status, "domain": domain, "edited": ""}
     if edited:
         tmpl_args["edited"] = "Also the task's name or description were changed."
@@ -34,7 +38,6 @@ This is automatic letter from Simple task manager\n"""
         msg_text,
         settings.DEFAULT_FROM_EMAIL,
         (user.email,),
-        # headers=HEADERS
     )
 
     q = Queue('send_email', connection=redis_conn)

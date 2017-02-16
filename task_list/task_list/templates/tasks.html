@@ -4,6 +4,7 @@
     <script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
+    <title>Simple Task manager</title>
 </head>
 
 <body>
@@ -19,7 +20,13 @@
 </div>
 
 <div id="users-contain" class="ui-widget">
-    <h1>Welcome to Simple task manager, {{ username }}</h1>
+    <h1>Welcome to Simple task manager, {{ username }}</h1> 
+    <span style="float: left;">
+        <a href="/admin/logout">logout</a>
+        {% if user.is_superuser %}
+            &nbsp;&nbsp; <a href="/admin">admin</a>
+        {% endif %}
+    </span>
 
     <span style="float: right;">
         <span id="loadingDiv">Loading...</span> &nbsp;&nbsp;
