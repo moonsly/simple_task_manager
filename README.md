@@ -70,14 +70,14 @@ DATABASES = {
 
 ## Demo screenshots
 
-![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM1.png)
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM1.png "General task list")
 
-![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_add.png)
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_add.png "Add task menu")
 
-![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_edit.png)
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_edit.png "Edit task")
 
-![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_filter_by_owner.png)
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_filter_by_owner.png "Filter tasks by owner (only mine)")
 
-![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_filter_done.png)
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_filter_done.png "Hide done tasks")
 
 
