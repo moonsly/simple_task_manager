@@ -128,3 +128,8 @@ STATIC_URL = '/static/'
 
 DEFAULT_FROM_EMAIL = "test@localhost"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# -- to send real emails - uncomment the following lines:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'localhost'
+# EMAIL_PORT = 25

@@ -1,6 +1,7 @@
 Simple task manager on Python3, Django 1.9, jquery UI.
 ========
 
+Redmine-like simple task manager, without separate projects, access rights - shared task flow for all registered users.
 To add new members - django admin needs to login, add user and mark him as staff.
 Admin also able to edit all the tasks in django admin.
 
@@ -8,6 +9,11 @@ Staff user can create new tasks, edit/delete their tasks, start/make done any ex
 
 Add task form is implemented via jquery UI, edit task is implemented as ajax form in the tasks table.
 Email messages queue is implemented using redis and python-rq.
+
+Extra features
+========
+
+Added email notification queue via redis-queue. To send emails - admin should set correct emails for your users and uncomment lines in the end of settings.py
 
 INSTALL
 ========
