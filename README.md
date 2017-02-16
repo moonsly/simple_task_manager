@@ -70,5 +70,14 @@ DATABASES = {
 
 ## Demo screenshots
 
-![title](https://github.com/moonsly/simple_task_manager)
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM1.png)
+
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_add.png)
+
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_edit.png)
+
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_filter_by_owner.png)
+
+![title](https://github.com/moonsly/simple_task_manager/raw/master/screenshots/TM_filter_done.png)
+
 
