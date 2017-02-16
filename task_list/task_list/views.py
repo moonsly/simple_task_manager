@@ -7,7 +7,7 @@ from django.template import RequestContext
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from django import forms
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
@@ -24,8 +24,7 @@ def tasks_main(request):
     """Main SPA view with task list"""
     task_form = TaskForm(initial={"owner": request.user, "assigned": request.user})
     context = {"username": request.user.username, "user": request.user, "task_form": task_form}
-    return render_to_response("tasks.html", context=context,
-                              context_instance=RequestContext(request))
+    return render(request, "tasks.html", context=context)
 
 
 @staff_member_required
@@ -57,8 +56,7 @@ def task_list(request):
         r_task["flavor_status"] = tsk.flavor_status
         res_tasks.append(r_task)
     context = {"tasks": res_tasks, "user": request.user}
-    return render_to_response("task_rows.html", context=context,
-                              context_instance=RequestContext(request))
+    return render(request, "task_rows.html", context=context)
 
 
 @staff_member_required
